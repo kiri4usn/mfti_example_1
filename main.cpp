@@ -111,7 +111,7 @@ string float_check(string num){
 }
 
 /*******************************
-/ Проверяем введенное колличество. Если товар весовой то ок, а вот если нет...
+/ Проверяем введенное коичество. Если товар весовой то ок, а вот если нет...
 ******************************/
 
 string count_check(string count, bool type){
@@ -194,11 +194,11 @@ int main(){
         S_id = int_check(S_id); // проверка (точно int?)
 
         if(stoi(S_id) <= stock.size()-1) {
-            cout << "Введите колличество: ";
+            cout << "Введите коичество: ";
             cin >> S_count;
             S_count = float_check(S_count); // проверка (точно float?)
             S_count = count_check(S_count,stock[stoi(S_id)].SKU_type); // проверка (вес с типом товара совпадает?)
-            if (stock[stoi(S_id)].SKU_stock >= stof(S_count)) { // Сравниваем колличество желаемого товара с остатком на складе
+            if (stock[stoi(S_id)].SKU_stock >= stof(S_count)) { // Сравниваем коичество желаемого товара с остатком на складе
                 for (int i = 0; i < cart.size(); i++) { // перебор корзины (есть ли этот в ней уже)
                     if (stock[stoi(S_id)].SKU_name == cart[i].SKU_name) {
                         flag2 = true;
