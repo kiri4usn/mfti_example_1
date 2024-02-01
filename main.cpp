@@ -3,6 +3,7 @@
 #include <vector>
 #include <iomanip>
 #include <stdexcept>
+#include <math.h>
 
 using namespace std;
 
