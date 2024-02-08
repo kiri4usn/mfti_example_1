@@ -20,7 +20,7 @@ struct SKU{
 };
 
 /*******************************
-/  Оформление(цвет текста, фона)
+/  Оформление(цвет текста, фона) init 0 сбрасывает стили
 ******************************/
 
 string set_color(string text_color, string bg_color, bool init){
@@ -38,8 +38,9 @@ string set_color(string text_color, string bg_color, bool init){
 void print_struct(vector<SKU> stock, bool flag = 1) {
     for(int i = 0; i < stock.size(); i++){
         cout
-                << "id:" << i << "  \x1b[1;4m" << stock[i].SKU_name << ((int)stock[i].SKU_promotion_price!=0?" (Акция)":"")
-                << (flag == 1?"\x1b[0m":"")
+                << "\x1b[1m"
+                << "id:" << i << " " << stock[i].SKU_name << ((int)stock[i].SKU_promotion_price!=0?" (Акция)":"")
+                << (flag == 1? set_color("","", 0):"")
                 << "\n"
                 << "Цена: "
                 << setw(10)
@@ -64,9 +65,15 @@ float cart_summ(vector<SKU> cart){
     return Cart_summ;
 }
 
-double check_round(double value, double precision)
+/*******************************
+/ Делаем round() удобнее
+******************************/
+
+float round2(float num, float precision)
 {
-    return round(value / precision) * precision;
+    float num2; //Добавил для блок-схемы
+    num2= round(num / precision) * precision;
+    return num2;
 }
 
 /*******************************
@@ -89,9 +96,13 @@ string bool_check(string num) {
 
 string int_check(string num){
     try {
-        return to_string(stoi(num));
+        if(stof(num) - stoi(num) == 0) {
+            return num;
+        } else {
+            return int_check("num");
+        }
     } catch (invalid_argument e){
-        cout << "\x1b[1;4m" << set_color("41", "30", 1) << "Вводить можно только число: " << set_color("", "", 0);
+        cout << "\x1b[1;4m" << set_color("41", "30", 1) << "Вводить можно только целое число: " << set_color("", "", 0);
         cin >> num;
         return int_check(num);
     }
@@ -112,18 +123,18 @@ string float_check(string num){
 }
 
 /*******************************
-/ Проверяем введенное коичество. Если товар весовой то ок, а вот если нет...
+/ Проверяем введенное колличество. Если товар весовой то ок, а вот если нет...
 ******************************/
 
 string count_check(string count, bool type){
-    if(type == 0 && stof(count) == check_round(stof(count),1)){
+    if(type == 0 && stof(count) == round2(stof(count),1)){
         return count;
     } else if (type == 0){
         cout << "\x1b[1;4m" << set_color("41", "30", 1) << "Товар не весовой, введите целое число: " << set_color("", "", 0);
         cin >> count;
         return count_check(float_check(count), type);
     } else {
-        return count;
+        return float_check(count);
     }
 }
 
@@ -145,6 +156,8 @@ int main(){
 
     int loyalty_bonuses = 570; // 1 рубль = 10 бонусов
     int loyalty_discount = 5; // скидка 5%
+    string summ;
+    string U_name;
 
     /*******************************
     / Добавляем базовые SKU
@@ -174,12 +187,14 @@ int main(){
     /*******************************
     / Название
     ******************************/
-
+    cout << "Как к вам обращаться? ";
+    cin >> U_name;
     cout << set_color("41","30",1)
          << "************************************************\n"
          << "                 Шестерочка\n"
          << "************************************************\n"
          << set_color("","",0)
+         << "\n\nПриветствуем, " << U_name << "\n\n"
          << "\nСписок доступных продуктов:\n\n";
 
     print_struct(stock); // Доступные товары
@@ -195,11 +210,11 @@ int main(){
         S_id = int_check(S_id); // проверка (точно int?)
 
         if(stoi(S_id) <= stock.size()-1) {
-            cout << "Введите коичество: ";
+            cout << "Введите колличество: ";
             cin >> S_count;
             S_count = float_check(S_count); // проверка (точно float?)
             S_count = count_check(S_count,stock[stoi(S_id)].SKU_type); // проверка (вес с типом товара совпадает?)
-            if (stock[stoi(S_id)].SKU_stock >= stof(S_count)) { // Сравниваем коичество желаемого товара с остатком на складе
+            if (stock[stoi(S_id)].SKU_stock >= stof(S_count)) { // Сравниваем колличество желаемого товара с остатком на складе
                 for (int i = 0; i < cart.size(); i++) { // перебор корзины (есть ли этот в ней уже)
                     if (stock[stoi(S_id)].SKU_name == cart[i].SKU_name) {
                         flag2 = true;
@@ -223,7 +238,7 @@ int main(){
         cin >> S_flag;
         S_flag = bool_check(S_flag);
     }
-    cout << "У вас накопилось " << loyalty_bonuses << " бонусов.\n 1 руб = 10 бонусов. Списать? 1 - да, 0 - нет ";
+    cout << "У вас накопилось " << loyalty_bonuses << " бонусов.\n1 руб = 10 бонусов. Списать? 1 - да, 0 - нет ";
     cin >> S_flag;
     S_flag = bool_check(S_flag);
 
@@ -232,10 +247,13 @@ int main(){
     print_struct(cart, 0);
 
     cout<< "________________________________\n"
-        << "Сумма до скидки: " << check_round(cart_summ(cart), 0.01)
+        << "Сумма до скидки: " << round2(cart_summ(cart), 0.01)
         << "\nБонусов списанно: " << (stoi(S_flag)?loyalty_bonuses/10:0) << " руб"
         << "\nCкидка: " << loyalty_discount << "%\n"
-        << "Итого: " << check_round(cart_summ(cart)*(1.0-loyalty_discount/100.0) - (stoi(S_flag)?loyalty_bonuses/10:0), 0.01) << "\n\n";
+        << "Итого: " << round2(cart_summ(cart)*(1.0-loyalty_discount/100.0) - (stoi(S_flag)?loyalty_bonuses/10:0), 0.01) << "\n"
+        << set_color("","",0) << "\nВведите наличные: ";
+    cin >> summ;
+    cout << "Сдача: " << stoi(int_check(summ)) - round2(cart_summ(cart)*(1.0-loyalty_discount/100.0) - (stoi(S_flag)?loyalty_bonuses/10:0), 0.01);
 
     return 0;
 }
