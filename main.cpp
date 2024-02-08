@@ -54,7 +54,7 @@ void print_struct(vector<SKU> stock, bool flag = 1) {
 };
 
 /*******************************
-/ Сумма пакупки
+/ Сумма покупки
 ******************************/
 
 float cart_summ(vector<SKU> cart){
@@ -234,7 +234,7 @@ int main(){
         } else {
             cout << "id не существует, но скоро завезут(((\n";
         }
-        cout << "Продолжить пакупки? 1 - да, 0 - нет: ";
+        cout << "Продолжить покупки? 1 - да, 0 - нет: ";
         cin >> S_flag;
         S_flag = bool_check(S_flag);
     }
